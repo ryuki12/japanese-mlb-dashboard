@@ -53,66 +53,57 @@ const pitcherColumns = [
   { label: "更新時刻", key: "updatedAt" },
 ] satisfies { label: string; key: keyof Pitcher }[];
 
-type DbRow = Record<string, unknown>;
-
 type DashboardData = {
   hitters: Hitter[];
   pitchers: Pitcher[];
   errorMessage?: string;
 };
 
-function getValue(row: DbRow | undefined, keys: string[]) {
-  if (!row) {
-    return undefined;
-  }
+type PlayerRow = {
+  id: number;
+  mlbam_id: number | null;
+  name_ja: string;
+  name_en: string;
+  team_abbr: string;
+  type: string;
+  is_active: boolean;
+  created_at: string;
+  updated_at: string;
+};
 
-  return keys.map((key) => row[key]).find((value) => value != null);
-}
+type HitterSeasonStatsRow = {
+  id: number;
+  player_id: number;
+  season: number;
+  avg: string;
+  home_runs: number;
+  rbi: number;
+  stolen_bases: number;
+  ops: string;
+  updated_at: string;
+  games: number;
+  plate_appearances: number;
+  at_bats: number;
+  hits: number;
+  walks: number;
+  hit_by_pitch: number;
+};
 
-function getString(row: DbRow | undefined, keys: string[], fallback = "") {
-  const value = getValue(row, keys);
+type PitcherSeasonStatsRow = {
+  id: number;
+  player_id: number;
+  season: number;
+  era: string;
+  wins: number;
+  losses: number;
+  saves: number;
+  strikeouts: number;
+  whip: string;
+  updated_at: string;
+};
 
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value === "number") {
-    return String(value);
-  }
-
-  return fallback;
-}
-
-function getNumber(row: DbRow | undefined, keys: string[], fallback = 0) {
-  const value = getValue(row, keys);
-
-  if (typeof value === "number") {
-    return value;
-  }
-
-  if (typeof value === "string") {
-    const parsed = Number(value);
-    return Number.isFinite(parsed) ? parsed : fallback;
-  }
-
-  return fallback;
-}
-
-function formatRate(value: unknown, digits: number) {
-  if (typeof value === "string") {
-    return value;
-  }
-
-  if (typeof value !== "number") {
-    return "-";
-  }
-
-  const formatted = value.toFixed(digits);
-  return value > 0 && value < 1 ? formatted.replace(/^0/, "") : formatted;
-}
-
-function formatUpdatedAt(value: unknown) {
-  if (typeof value !== "string" || value.length === 0) {
+function formatUpdatedAt(value: string) {
+  if (value.length === 0) {
     return "-";
   }
 
@@ -132,69 +123,43 @@ function formatUpdatedAt(value: unknown) {
   });
 }
 
-function getPlayerId(row: DbRow) {
-  return getString(row, ["id", "player_id"]);
+function createPlayerMap(players: PlayerRow[]) {
+  return new Map(players.map((player) => [player.id, player]));
 }
 
-function createPlayerMap(players: DbRow[]) {
-  return new Map(players.map((player) => [getPlayerId(player), player]));
-}
-
-function getPlayerName(player: DbRow | undefined, stats: DbRow) {
-  return getString(
-    player,
-    ["name", "name_ja", "player_name", "full_name"],
-    getString(stats, ["player_name", "name"], "-")
-  );
-}
-
-function getTeamName(player: DbRow | undefined, stats: DbRow) {
-  return getString(
-    stats,
-    ["team", "team_name"],
-    getString(player, ["team", "team_name"], "-")
-  );
-}
-
-function toHitter(stats: DbRow, player: DbRow | undefined): Hitter {
-  const walksAndHitByPitch =
-    getNumber(stats, ["walks_and_hit_by_pitch", "bb_hbp"], Number.NaN) ||
-    getNumber(stats, ["walks", "base_on_balls", "bb"]) +
-      getNumber(stats, ["hit_by_pitch", "hit_by_pitches", "hbp"]);
-
+function toHitter(
+  stats: HitterSeasonStatsRow,
+  player: PlayerRow | undefined
+): Hitter {
   return {
-    player: getPlayerName(player, stats),
-    team: getTeamName(player, stats),
-    games: getNumber(stats, ["games", "games_played", "g"]),
-    plateAppearances: getNumber(stats, ["plate_appearances", "pa"]),
-    average: formatRate(
-      getValue(stats, ["batting_average", "average", "avg"]),
-      3
-    ),
-    homeRuns: getNumber(stats, ["home_runs", "hr"]),
-    rbi: getNumber(stats, ["rbi", "runs_batted_in"]),
-    stolenBases: getNumber(stats, ["stolen_bases", "sb"]),
-    walksAndHitByPitch,
-    ops: formatRate(getValue(stats, ["ops"]), 3),
-    updatedAt: formatUpdatedAt(
-      getValue(stats, ["updated_at", "last_updated_at"])
-    ),
+    player: player?.name_ja ?? "-",
+    team: player?.team_abbr ?? "-",
+    games: stats.games,
+    plateAppearances: stats.plate_appearances,
+    average: stats.avg,
+    homeRuns: stats.home_runs,
+    rbi: stats.rbi,
+    stolenBases: stats.stolen_bases,
+    walksAndHitByPitch: stats.walks + stats.hit_by_pitch,
+    ops: stats.ops,
+    updatedAt: formatUpdatedAt(stats.updated_at),
   };
 }
 
-function toPitcher(stats: DbRow, player: DbRow | undefined): Pitcher {
+function toPitcher(
+  stats: PitcherSeasonStatsRow,
+  player: PlayerRow | undefined
+): Pitcher {
   return {
-    player: getPlayerName(player, stats),
-    team: getTeamName(player, stats),
-    era: formatRate(getValue(stats, ["era", "earned_run_average"]), 2),
-    wins: getNumber(stats, ["wins", "w"]),
-    losses: getNumber(stats, ["losses", "l"]),
-    saves: getNumber(stats, ["saves", "sv"]),
-    strikeouts: getNumber(stats, ["strikeouts", "so", "k"]),
-    whip: formatRate(getValue(stats, ["whip"]), 2),
-    updatedAt: formatUpdatedAt(
-      getValue(stats, ["updated_at", "last_updated_at"])
-    ),
+    player: player?.name_ja ?? "-",
+    team: player?.team_abbr ?? "-",
+    era: stats.era,
+    wins: stats.wins,
+    losses: stats.losses,
+    saves: stats.saves,
+    strikeouts: stats.strikeouts,
+    whip: stats.whip,
+    updatedAt: formatUpdatedAt(stats.updated_at),
   };
 }
 
@@ -212,9 +177,22 @@ async function getDashboardData(): Promise<DashboardData> {
   }
 
   const [playersResult, hittersResult, pitchersResult] = await Promise.all([
-    supabase.client.from("players").select("*"),
-    supabase.client.from("hitter_season_stats").select("*"),
-    supabase.client.from("pitcher_season_stats").select("*"),
+    supabase.client
+      .from("players")
+      .select(
+        "id, mlbam_id, name_ja, name_en, team_abbr, type, is_active, created_at, updated_at"
+      )
+      .eq("is_active", true),
+    supabase.client
+      .from("hitter_season_stats")
+      .select(
+        "id, player_id, season, avg, home_runs, rbi, stolen_bases, ops, updated_at, games, plate_appearances, at_bats, hits, walks, hit_by_pitch"
+      ),
+    supabase.client
+      .from("pitcher_season_stats")
+      .select(
+        "id, player_id, season, era, wins, losses, saves, strikeouts, whip, updated_at"
+      ),
   ]);
 
   const error =
@@ -228,14 +206,14 @@ async function getDashboardData(): Promise<DashboardData> {
     };
   }
 
-  const players = (playersResult.data ?? []) as DbRow[];
+  const players = (playersResult.data ?? []) as PlayerRow[];
   const playerMap = createPlayerMap(players);
-  const hitters = ((hittersResult.data ?? []) as DbRow[]).map((stats) =>
-    toHitter(stats, playerMap.get(getString(stats, ["player_id"])))
+  const hitters = ((hittersResult.data ?? []) as HitterSeasonStatsRow[]).map(
+    (stats) => toHitter(stats, playerMap.get(stats.player_id))
   );
-  const pitchers = ((pitchersResult.data ?? []) as DbRow[]).map((stats) =>
-    toPitcher(stats, playerMap.get(getString(stats, ["player_id"])))
-  );
+  const pitchers = (
+    (pitchersResult.data ?? []) as PitcherSeasonStatsRow[]
+  ).map((stats) => toPitcher(stats, playerMap.get(stats.player_id)));
 
   return { hitters, pitchers };
 }
