@@ -1,65 +1,225 @@
-import Image from "next/image";
+type Hitter = {
+  player: string;
+  team: string;
+  average: string;
+  homeRuns: number;
+  rbi: number;
+  stolenBases: number;
+  ops: string;
+  updatedAt: string;
+};
+
+type Pitcher = {
+  player: string;
+  team: string;
+  era: string;
+  wins: number;
+  losses: number;
+  saves: number;
+  strikeouts: number;
+  whip: string;
+  updatedAt: string;
+};
+
+const hitters: Hitter[] = [
+  {
+    player: "大谷 翔平",
+    team: "ドジャース",
+    average: ".312",
+    homeRuns: 21,
+    rbi: 54,
+    stolenBases: 12,
+    ops: "1.021",
+    updatedAt: "2026/05/26 22:30",
+  },
+  {
+    player: "鈴木 誠也",
+    team: "カブス",
+    average: ".286",
+    homeRuns: 13,
+    rbi: 42,
+    stolenBases: 3,
+    ops: ".874",
+    updatedAt: "2026/05/26 22:30",
+  },
+  {
+    player: "吉田 正尚",
+    team: "レッドソックス",
+    average: ".274",
+    homeRuns: 5,
+    rbi: 24,
+    stolenBases: 1,
+    ops: ".742",
+    updatedAt: "2026/05/26 22:30",
+  },
+];
+
+const pitchers: Pitcher[] = [
+  {
+    player: "山本 由伸",
+    team: "ドジャース",
+    era: "2.71",
+    wins: 6,
+    losses: 2,
+    saves: 0,
+    strikeouts: 68,
+    whip: "1.03",
+    updatedAt: "2026/05/26 22:30",
+  },
+  {
+    player: "今永 昇太",
+    team: "カブス",
+    era: "3.08",
+    wins: 5,
+    losses: 3,
+    saves: 0,
+    strikeouts: 61,
+    whip: "1.10",
+    updatedAt: "2026/05/26 22:30",
+  },
+  {
+    player: "ダルビッシュ 有",
+    team: "パドレス",
+    era: "3.42",
+    wins: 4,
+    losses: 3,
+    saves: 0,
+    strikeouts: 57,
+    whip: "1.18",
+    updatedAt: "2026/05/26 22:30",
+  },
+];
+
+const hitterColumns = [
+  { label: "選手", key: "player" },
+  { label: "チーム", key: "team" },
+  { label: "打率", key: "average" },
+  { label: "本塁打", key: "homeRuns" },
+  { label: "打点", key: "rbi" },
+  { label: "盗塁", key: "stolenBases" },
+  { label: "OPS", key: "ops" },
+  { label: "更新時刻", key: "updatedAt" },
+] satisfies { label: string; key: keyof Hitter }[];
+
+const pitcherColumns = [
+  { label: "選手", key: "player" },
+  { label: "チーム", key: "team" },
+  { label: "防御率", key: "era" },
+  { label: "勝", key: "wins" },
+  { label: "敗", key: "losses" },
+  { label: "セーブ", key: "saves" },
+  { label: "奪三振", key: "strikeouts" },
+  { label: "WHIP", key: "whip" },
+  { label: "更新時刻", key: "updatedAt" },
+] satisfies { label: string; key: keyof Pitcher }[];
+
+function StatsSection<T extends Record<string, string | number>>({
+  title,
+  description,
+  columns,
+  rows,
+}: {
+  title: string;
+  description: string;
+  columns: { label: string; key: keyof T }[];
+  rows: T[];
+}) {
+  return (
+    <section className="space-y-4">
+      <div>
+        <h2 className="text-xl font-semibold text-zinc-950">{title}</h2>
+        <p className="mt-1 text-sm leading-6 text-zinc-600">{description}</p>
+      </div>
+
+      <div className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm md:block">
+        <table className="w-full border-collapse text-left text-sm">
+          <thead className="bg-zinc-100 text-xs font-semibold uppercase tracking-wide text-zinc-600">
+            <tr>
+              {columns.map((column) => (
+                <th key={String(column.key)} className="px-4 py-3">
+                  {column.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-zinc-100">
+            {rows.map((row) => (
+              <tr key={String(row.player)} className="hover:bg-zinc-50">
+                {columns.map((column) => (
+                  <td
+                    key={String(column.key)}
+                    className="px-4 py-4 text-zinc-800 first:font-medium first:text-zinc-950"
+                  >
+                    {row[column.key]}
+                  </td>
+                ))}
+              </tr>
+            ))}
+          </tbody>
+        </table>
+      </div>
+
+      <div className="grid gap-3 md:hidden">
+        {rows.map((row) => (
+          <article
+            key={String(row.player)}
+            className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
+          >
+            <div className="flex items-start justify-between gap-3 border-b border-zinc-100 pb-3">
+              <div>
+                <h3 className="font-semibold text-zinc-950">{row.player}</h3>
+                <p className="mt-1 text-sm text-zinc-600">{row.team}</p>
+              </div>
+              <p className="text-right text-xs leading-5 text-zinc-500">
+                {row.updatedAt}
+              </p>
+            </div>
+            <dl className="mt-3 grid grid-cols-2 gap-3 text-sm">
+              {columns.slice(2, -1).map((column) => (
+                <div key={String(column.key)} className="rounded-md bg-zinc-50 p-3">
+                  <dt className="text-xs text-zinc-500">{column.label}</dt>
+                  <dd className="mt-1 font-semibold text-zinc-950">
+                    {row[column.key]}
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          </article>
+        ))}
+      </div>
+    </section>
+  );
+}
 
 export default function Home() {
   return (
-    <div className="flex flex-col flex-1 items-center justify-center bg-zinc-50 font-sans dark:bg-black">
-      <main className="flex flex-1 w-full max-w-3xl flex-col items-center justify-between py-32 px-16 bg-white dark:bg-black sm:items-start">
-        <Image
-          className="dark:invert"
-          src="/next.svg"
-          alt="Next.js logo"
-          width={100}
-          height={20}
-          priority
-        />
-        <div className="flex flex-col items-center gap-6 text-center sm:items-start sm:text-left">
-          <h1 className="max-w-xs text-3xl font-semibold leading-10 tracking-tight text-black dark:text-zinc-50">
-            To get started, edit the page.tsx file.
+    <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 lg:px-8">
+      <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
+        <header className="space-y-3">
+          <p className="text-sm font-medium text-emerald-700">Phase 1 Mock</p>
+          <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
+            日本人メジャーリーガー最新情報
           </h1>
-          <p className="max-w-md text-lg leading-8 text-zinc-600 dark:text-zinc-400">
-            Looking for a starting point or more instructions? Head over to{" "}
-            <a
-              href="https://vercel.com/templates?framework=next.js&utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Templates
-            </a>{" "}
-            or the{" "}
-            <a
-              href="https://nextjs.org/learn?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-              className="font-medium text-zinc-950 dark:text-zinc-50"
-            >
-              Learning
-            </a>{" "}
-            center.
+          <p className="max-w-3xl text-sm leading-6 text-zinc-600 sm:text-base">
+            日本人MLB選手の主要成績を一覧できるダッシュボードです。現在はPhase
+            1としてモックデータを表示しています。
           </p>
-        </div>
-        <div className="flex flex-col gap-4 text-base font-medium sm:flex-row">
-          <a
-            className="flex h-12 w-full items-center justify-center gap-2 rounded-full bg-foreground px-5 text-background transition-colors hover:bg-[#383838] dark:hover:bg-[#ccc] md:w-[158px]"
-            href="https://vercel.com/new?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image
-              className="dark:invert"
-              src="/vercel.svg"
-              alt="Vercel logomark"
-              width={16}
-              height={16}
-            />
-            Deploy Now
-          </a>
-          <a
-            className="flex h-12 w-full items-center justify-center rounded-full border border-solid border-black/[.08] px-5 transition-colors hover:border-transparent hover:bg-black/[.04] dark:border-white/[.145] dark:hover:bg-[#1a1a1a] md:w-[158px]"
-            href="https://nextjs.org/docs?utm_source=create-next-app&utm_medium=appdir-template-tw&utm_campaign=create-next-app"
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            Documentation
-          </a>
-        </div>
-      </main>
-    </div>
+        </header>
+
+        <StatsSection
+          title="野手成績"
+          description="打撃成績と走塁指標を確認できます。"
+          columns={hitterColumns}
+          rows={hitters}
+        />
+
+        <StatsSection
+          title="投手成績"
+          description="先発・救援投手の主要な投球成績を確認できます。"
+          columns={pitcherColumns}
+          rows={pitchers}
+        />
+      </div>
+    </main>
   );
 }
