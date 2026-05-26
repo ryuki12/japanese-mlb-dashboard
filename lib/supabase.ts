@@ -42,3 +42,26 @@ export function createSupabaseClient() {
     }),
   };
 }
+
+export function createSupabaseServerClient() {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const secretKey =
+    process.env.SUPABASE_SECRET_KEY ?? process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!url || !secretKey) {
+    return {
+      ok: false as const,
+      message: "Supabaseのサーバー用環境変数が設定されていません。",
+    };
+  }
+
+  return {
+    ok: true as const,
+    client: createClient(url, secretKey, {
+      auth: {
+        persistSession: false,
+        autoRefreshToken: false,
+      },
+    }),
+  };
+}
