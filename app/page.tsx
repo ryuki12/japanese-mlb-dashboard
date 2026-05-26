@@ -1,10 +1,13 @@
 type Hitter = {
   player: string;
   team: string;
+  games: number;
+  plateAppearances: number;
   average: string;
   homeRuns: number;
   rbi: number;
   stolenBases: number;
+  walksAndHitByPitch: number;
   ops: string;
   updatedAt: string;
 };
@@ -25,30 +28,39 @@ const hitters: Hitter[] = [
   {
     player: "大谷 翔平",
     team: "ドジャース",
+    games: 52,
+    plateAppearances: 236,
     average: ".312",
     homeRuns: 21,
     rbi: 54,
     stolenBases: 12,
+    walksAndHitByPitch: 38,
     ops: "1.021",
     updatedAt: "2026/05/26 22:30",
   },
   {
     player: "鈴木 誠也",
     team: "カブス",
+    games: 48,
+    plateAppearances: 204,
     average: ".286",
     homeRuns: 13,
     rbi: 42,
     stolenBases: 3,
+    walksAndHitByPitch: 23,
     ops: ".874",
     updatedAt: "2026/05/26 22:30",
   },
   {
     player: "吉田 正尚",
     team: "レッドソックス",
+    games: 39,
+    plateAppearances: 151,
     average: ".274",
     homeRuns: 5,
     rbi: 24,
     stolenBases: 1,
+    walksAndHitByPitch: 16,
     ops: ".742",
     updatedAt: "2026/05/26 22:30",
   },
@@ -93,10 +105,13 @@ const pitchers: Pitcher[] = [
 const hitterColumns = [
   { label: "選手", key: "player" },
   { label: "チーム", key: "team" },
+  { label: "試合数", key: "games" },
+  { label: "打席数", key: "plateAppearances" },
   { label: "打率", key: "average" },
   { label: "本塁打", key: "homeRuns" },
   { label: "打点", key: "rbi" },
   { label: "盗塁", key: "stolenBases" },
+  { label: "四死球", key: "walksAndHitByPitch" },
   { label: "OPS", key: "ops" },
   { label: "更新時刻", key: "updatedAt" },
 ] satisfies { label: string; key: keyof Hitter }[];
@@ -131,8 +146,8 @@ function StatsSection<T extends Record<string, string | number>>({
         <p className="mt-1 text-sm leading-6 text-zinc-600">{description}</p>
       </div>
 
-      <div className="hidden overflow-hidden rounded-lg border border-zinc-200 bg-white shadow-sm md:block">
-        <table className="w-full border-collapse text-left text-sm">
+      <div className="hidden overflow-x-auto rounded-lg border border-zinc-200 bg-white shadow-sm md:block">
+        <table className="w-full min-w-max border-collapse text-left text-sm">
           <thead className="bg-zinc-100 text-xs font-semibold uppercase tracking-wide text-zinc-600">
             <tr>
               {columns.map((column) => (
