@@ -1,5 +1,28 @@
 This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
 
+## 日本人メジャーリーガー最新情報
+
+Phase 1では、トップページに日本人MLB選手のモック成績を表示します。
+
+### 実装済み
+
+- トップページタイトル「日本人メジャーリーガー最新情報」
+- 野手テーブル: 選手、チーム、打率、本塁打、打点、盗塁、OPS、更新時刻
+- 投手テーブル: 選手、チーム、防御率、勝、敗、セーブ、奪三振、WHIP、更新時刻
+- スマホではカード形式、タブレット以上ではテーブル形式で表示
+
+### これから実装する内容
+
+- 実データ取得方法の検討
+- 更新頻度と取得元に合わせたキャッシュ設計
+- 選手追加・絞り込み・並び替え
+
+### 残タスク
+
+- MLB公式または信頼できるデータソースとの連携
+- データ取得失敗時の表示
+- 自動更新時刻の管理
+
 ## Getting Started
 
 First, run the development server:
