@@ -4,7 +4,7 @@ export type SupabaseConfig =
   | {
       ok: true;
       url: string;
-      anonKey: string;
+      publishableKey: string;
     }
   | {
       ok: false;
@@ -13,16 +13,16 @@ export type SupabaseConfig =
 
 export function getSupabaseConfig(): SupabaseConfig {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const anonKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+  const publishableKey = process.env.NEXT_PUBLIC_SUPABASE_PUBLISHABLE_KEY;
 
-  if (!url || !anonKey) {
+  if (!url || !publishableKey) {
     return {
       ok: false,
       message: "Supabaseの環境変数が設定されていません。",
     };
   }
 
-  return { ok: true, url, anonKey };
+  return { ok: true, url, publishableKey };
 }
 
 export function createSupabaseClient() {
@@ -34,7 +34,7 @@ export function createSupabaseClient() {
 
   return {
     ok: true as const,
-    client: createClient(config.url, config.anonKey, {
+    client: createClient(config.url, config.publishableKey, {
       auth: {
         persistSession: false,
         autoRefreshToken: false,
