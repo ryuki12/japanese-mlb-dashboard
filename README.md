@@ -2,25 +2,29 @@ This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-
 
 ## 日本人メジャーリーガー最新情報
 
-Phase 1では、トップページに日本人MLB選手のモック成績を表示します。
+Phase 1では、トップページに日本人MLB選手の成績を表示します。
 
 ### 実装済み
 
 - トップページタイトル「日本人メジャーリーガー最新情報」
+- Supabaseの `players`, `hitter_season_stats`, `pitcher_season_stats` から表示用データを取得
 - 野手テーブル: 選手、チーム、試合数、打席数、打率、本塁打、打点、盗塁、四死球、OPS、更新時刻
 - 投手テーブル: 選手、チーム、防御率、勝、敗、セーブ、奪三振、WHIP、更新時刻
 - スマホではカード形式、タブレット以上ではテーブル形式で表示
+- データがない場合は「データがありません」を表示
+- 取得エラー時は画面に簡潔なエラーメッセージを表示
+- 開発時のNext.js dev indicatorを非表示
 
 ### これから実装する内容
 
-- 実データ取得方法の検討
 - 更新頻度と取得元に合わせたキャッシュ設計
 - 選手追加・絞り込み・並び替え
+- 管理画面の設計
 
 ### 残タスク
 
-- MLB公式または信頼できるデータソースとの連携
-- データ取得失敗時の表示
+- 本番環境への `NEXT_PUBLIC_SUPABASE_URL` と `NEXT_PUBLIC_SUPABASE_ANON_KEY` の設定
+- 実データ投入フローの整備
 - 自動更新時刻の管理
 
 ## Getting Started
@@ -41,7 +45,7 @@ Open [http://localhost:3000](http://localhost:3000) with your browser to see the
 
 You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+This project uses Tailwind CSS for styling.
 
 ## Learn More
 
