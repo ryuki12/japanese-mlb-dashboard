@@ -2,6 +2,7 @@ import { connection } from "next/server";
 import { createSupabaseClient } from "@/lib/supabase";
 
 type Hitter = {
+  id: number;
   player: string;
   team: string;
   games: number;
@@ -16,6 +17,7 @@ type Hitter = {
 };
 
 type Pitcher = {
+  id: number;
   player: string;
   team: string;
   era: string;
@@ -132,6 +134,7 @@ function toHitter(
   player: PlayerRow | undefined
 ): Hitter {
   return {
+    id: stats.id,
     player: player?.name_ja ?? "-",
     team: player?.team_abbr ?? "-",
     games: stats.games,
@@ -151,6 +154,7 @@ function toPitcher(
   player: PlayerRow | undefined
 ): Pitcher {
   return {
+    id: stats.id,
     player: player?.name_ja ?? "-",
     team: player?.team_abbr ?? "-",
     era: stats.era,
@@ -162,6 +166,8 @@ function toPitcher(
     updatedAt: formatUpdatedAt(stats.updated_at),
   };
 }
+
+const CURRENT_SEASON = new Date().getFullYear();
 
 async function getDashboardData(): Promise<DashboardData> {
   await connection();
@@ -187,18 +193,24 @@ async function getDashboardData(): Promise<DashboardData> {
       .from("hitter_season_stats")
       .select(
         "id, player_id, season, avg, home_runs, rbi, stolen_bases, ops, updated_at, games, plate_appearances, at_bats, hits, walks, hit_by_pitch"
-      ),
+      )
+      .eq("season", CURRENT_SEASON),
     supabase.client
       .from("pitcher_season_stats")
       .select(
         "id, player_id, season, era, wins, losses, saves, strikeouts, whip, updated_at"
-      ),
+      )
+      .eq("season", CURRENT_SEASON),
   ]);
 
-  const error =
-    playersResult.error ?? hittersResult.error ?? pitchersResult.error;
+  const errors = [
+    playersResult.error,
+    hittersResult.error,
+    pitchersResult.error,
+  ].filter(Boolean);
 
-  if (error) {
+  if (errors.length > 0) {
+    console.error("Supabase query errors:", errors);
     return {
       hitters: [],
       pitchers: [],
@@ -250,7 +262,7 @@ function StatsSection<T extends Record<string, string | number>>({
             </thead>
             <tbody className="divide-y divide-zinc-100">
               {rows.map((row) => (
-                <tr key={String(row.player)} className="hover:bg-zinc-50">
+                <tr key={String(row.id)} className="hover:bg-zinc-50">
                   {columns.map((column) => (
                     <td
                       key={String(column.key)}
@@ -274,7 +286,7 @@ function StatsSection<T extends Record<string, string | number>>({
         <div className="grid gap-3 md:hidden">
           {rows.map((row) => (
             <article
-              key={String(row.player)}
+              key={String(row.id)}
               className="rounded-lg border border-zinc-200 bg-white p-4 shadow-sm"
             >
               <div className="flex items-start justify-between gap-3 border-b border-zinc-100 pb-3">
