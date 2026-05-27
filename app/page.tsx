@@ -326,12 +326,11 @@ export default async function Home() {
     <main className="min-h-screen bg-zinc-50 px-4 py-8 text-zinc-950 sm:px-6 lg:px-8">
       <div className="mx-auto flex w-full max-w-6xl flex-col gap-8">
         <header className="space-y-3">
-          <p className="text-sm font-medium text-emerald-700">Supabase Data</p>
           <h1 className="text-3xl font-bold leading-tight sm:text-4xl">
             日本人メジャーリーガー最新情報
           </h1>
           <p className="max-w-3xl text-sm leading-6 text-zinc-600 sm:text-base">
-            日本人MLB選手の主要成績をSupabaseから取得して表示しています。
+            日本人MLB選手の主要成績をMLB Stats APIから取得して表示しています。
           </p>
         </header>
 
