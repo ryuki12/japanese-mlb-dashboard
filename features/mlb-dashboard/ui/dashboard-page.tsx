@@ -6,8 +6,8 @@ import type {
 import { StatsSection } from "./stats-section";
 
 const hitterColumns = [
-  { label: "選手", key: "player" },
-  { label: "チーム", key: "team" },
+  { label: "選手", key: "player", preferredDirection: "asc" },
+  { label: "チーム", key: "team", preferredDirection: "asc" },
   { label: "試合数", key: "games" },
   { label: "打席数", key: "plateAppearances" },
   { label: "打率", key: "average" },
@@ -17,19 +17,27 @@ const hitterColumns = [
   { label: "四死球", key: "walksAndHitByPitch" },
   { label: "OPS", key: "ops" },
   { label: "更新時刻", key: "updatedAt" },
-] satisfies { label: string; key: keyof HitterStats }[];
+] satisfies {
+  label: string;
+  key: keyof HitterStats;
+  preferredDirection?: "asc" | "desc";
+}[];
 
 const pitcherColumns = [
-  { label: "選手", key: "player" },
-  { label: "チーム", key: "team" },
-  { label: "防御率", key: "era" },
+  { label: "選手", key: "player", preferredDirection: "asc" },
+  { label: "チーム", key: "team", preferredDirection: "asc" },
+  { label: "防御率", key: "era", preferredDirection: "asc" },
   { label: "勝", key: "wins" },
-  { label: "敗", key: "losses" },
+  { label: "敗", key: "losses", preferredDirection: "asc" },
   { label: "セーブ", key: "saves" },
   { label: "奪三振", key: "strikeouts" },
-  { label: "WHIP", key: "whip" },
+  { label: "WHIP", key: "whip", preferredDirection: "asc" },
   { label: "更新時刻", key: "updatedAt" },
-] satisfies { label: string; key: keyof PitcherStats }[];
+] satisfies {
+  label: string;
+  key: keyof PitcherStats;
+  preferredDirection?: "asc" | "desc";
+}[];
 
 export function DashboardPage({
   hitters,
